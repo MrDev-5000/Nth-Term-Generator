@@ -1,133 +1,95 @@
 import numpy as np
-import os
-import subprocess
+from nicegui import ui
+
+inputs = []
+first_diff = []
+second_diff = []
+third_diff = []
+common_ratio = []
+sequence = []
+
+def init_data():
+    global first_diff
+    first_diff = np.empty(np.size(sequence) - 1)  if np.size(sequence) > 1 else np.array([])
+
+    global second_diff
+    second_diff = np.empty(np.size(first_diff) - 1) if np.size(first_diff) > 1 else np.array([])
+
+    global third_diff
+    third_diff = np.empty(np.size(second_diff) - 1) if np.size(second_diff) > 1 else np.array([])
+
+    global common_ratio
+    common_ratio = np.empty(np.size(sequence) - 1) if np.size(sequence) > 1 else np.array([])
 
 
-def InitData():
-    global FirstDiff
-    FirstDiff = np.empty(np.size(Sequence) - 1)  if np.size(Sequence) > 1 else np.array([])
-
-    global SecondDiff
-    SecondDiff = np.empty(np.size(FirstDiff) - 1) if np.size(FirstDiff) > 1 else np.array([])
-
-    global ThirdDiff
-    ThirdDiff = np.empty(np.size(SecondDiff) - 1) if np.size(SecondDiff) > 1 else np.array([])
-
-    global CommonRatio
-    CommonRatio = np.empty(np.size(Sequence) - 1) if np.size(Sequence) > 1 else np.array([])
-
-
-def get_sequence():
-    Num = []
-    while True:
-        n = int(input("How many numbers do you want to enter? ")) 
-        if n > 1:
-            break
-        else:
-            print("Insufficent number , pls provide at least 2 numbers")
-
-    for _ in range(n):
-        val = int(input("Enter a number: "))
-        Num.append(val)
-
-    global Sequence
-    Sequence = np.array(Num)
-    print("Entered Sequence:", Sequence)
-
-
-def clearConsole():
-    command = 'cls' if os.name == 'nt' else 'clear'
-    subprocess.run(command, shell=True)
-
-
-def display_nth_term(message):
-    print("* Nth TERM *") 
-    print(" = " + message)
-
-
-def Calculate_First_Diff():
-    FirstDiff = np.diff(Sequence)
-    print(f"First diff {FirstDiff}")
-        
-
-def Calculate_Second_Diff():
+def process_data():
+    global first_diff, second_diff, third_diff, common_ratio
     try:
-        SecondDiff = np.diff(FirstDiff)
+        first_diff = np.diff(sequence)
+        second_diff = np.diff(first_diff)
+        third_diff = np.diff(second_diff)
     except ValueError:
         pass
 
-
-def Calculate_Third_Diff():
-    try:
-        ThirdDiff = np.diff(SecondDiff)
-    except ValueError:
-        pass
+    calculate_common_ratio()
 
 
-def Calculate_Common_Ratio(Sequence):
-    _Sequence = np.asanyarray (Sequence)
-    Sequence = _Sequence[1:] / _Sequence[:-1]
+def calculate_common_ratio():
+    global common_ratio
+    _sequence = np.asanyarray (sequence)
+    common_ratio = _sequence[1:] / _sequence[:-1]
 
 
-def It_Is_Linear_Sequence():
-    FirstDiffSame = True
+def it_is_linear_sequence():
+    return np.size(first_diff) > 0 and np.allclose(first_diff, first_diff[0])
 
-    for i in range(np.size(FirstDiff)-1):
-        if FirstDiff[i] != FirstDiff[i + 1]:
-            FirstDiffSame = False
+
+def it_is_quadratic_sequence():
+    second_diff_same = True
+
+    for i in range(np.size(second_diff) - 1):
+        if second_diff[i] != second_diff[i + 1]:
+            second_diff_same = False
             break
 
-    if FirstDiffSame:
-        return True
-    else:
-        return False
-
-
-def It_Is_Quadratic_Sequence():
-    SecondDiffSame = True
-
-    for i in range(np.size(SecondDiff) - 1):
-        if SecondDiff[i] != SecondDiff[i + 1]:
-            SecondDiffSame = False
-            break
-
-    if SecondDiffSame:
+    if second_diff_same:
         return True
     else:
         return False
 
      
-def It_Is_Cubic_Sequence():
-    ThirdDiffSame = True
+def it_is_cubic_sequence():
+    third_diff_same = True
 
-    for i in range(np.size(ThirdDiff) - 1):
-        if ThirdDiff[i] != ThirdDiff[i + 1]:
-            ThirdDiffSame = False
+    for i in range(np.size(third_diff) - 1):
+        if third_diff[i] != third_diff[i + 1]:
+            third_diff_same = False
             break
 
-    if ThirdDiffSame:
+    if third_diff_same:
         return True
     else:
         return False
 
 
-def It_Is_Geometric_Sequence():
-    CommonRatioSame = True
+def it_is_geometric_sequence():
+    common_ratio_same = True
 
-    for i in range(np.size(CommonRatio) - 1):
-        if CommonRatio[i] != CommonRatio[i + 1]:
-            CommonRatioSame = False
+    for i in range(np.size(common_ratio) - 1):
+        if common_ratio[i] != common_ratio[i + 1]:
+            common_ratio_same = False
             break
 
-    if CommonRatioSame:
+    if common_ratio_same:
         return True
     else:
         return False
 
 
-def Get_Linear_nth_term():
-    d = FirstDiff[0]
-    a = Sequence[0]
+def get_linear_nth_term():
+    d = first_diff[0]
+    print(sequence)
+    a = sequence[0]
     nth_term = ""
 
     if d == 1:
@@ -144,10 +106,10 @@ def Get_Linear_nth_term():
     return nth_term
 
 
-def Get_Quadratic_nth_term():
-    a = SecondDiff[0] / 2.0
-    b = FirstDiff[0] - (3.0 * a)
-    c = Sequence[0] - (a + b)
+def get_quadratic_nth_term():
+    a = second_diff[0] / 2.0
+    b = first_diff[0] - (3.0 * a)
+    c = sequence[0] - (a + b)
     nth_term = ""
 
     if a == 1:
@@ -176,11 +138,11 @@ def Get_Quadratic_nth_term():
     return nth_term
 
 
-def Get_Cubic_nth_term():
-    a = ThirdDiff[0] / 6.0
-    b = (SecondDiff[0] - (12.0 * a)) / 2.0
-    c = FirstDiff[0] - (3.0 * b) - (7.0 * a)
-    d = Sequence[0] - (a + b + c)
+def get_cubic_nth_term():
+    a = third_diff[0] / 6.0
+    b = (second_diff[0] - (12.0 * a)) / 2.0
+    c = first_diff[0] - (3.0 * b) - (7.0 * a)
+    d = sequence[0] - (a + b + c)
     nth_term = ""
 
     if a == 1:
@@ -218,33 +180,55 @@ def Get_Cubic_nth_term():
     return nth_term
 
 
-def Get_Goemetric_nth_term():
+def get_geometric_nth_term():
     pass
 
-   
-if __name__ == "__main__":
 
-    get_sequence()
-    InitData()
+def update():
+    global sequence
+    sequence = np.array([inp.value for inp in inputs], dtype=float)
 
-    Calculate_First_Diff() 
+    init_data()
+    process_data()
 
-    Calculate_Second_Diff()
-    Calculate_Third_Diff()
-    Calculate_Common_Ratio(Sequence)
+    if it_is_linear_sequence():
+        result_label.set_text(f'Nth Term: {get_linear_nth_term()}')
 
-    if It_Is_Linear_Sequence():
-        display_nth_term(Get_Linear_nth_term())
+    elif it_is_quadratic_sequence():
+        result_label.set_text(f'Nth Term: {get_quadratic_nth_term()}')
 
-    elif It_Is_Quadratic_Sequence():
-        display_nth_term(Get_Quadratic_nth_term())
+    elif it_is_cubic_sequence():
+        result_label.set_text(f'Nth Term: {get_cubic_nth_term()}')
 
-    elif It_Is_Cubic_Sequence():
-        display_nth_term(Get_Cubic_nth_term())
-
-    elif It_Is_Geometric_Sequence():
-        # display_nth_term(Get_Goemetric_nth_term())
-        display_nth_term("Feature Unavailable")
+    elif it_is_geometric_sequence():
+        result_label.set_text(f'Nth Term: {get_geometric_nth_term()}')
 
     else:
-        display_nth_term("Generator Failed")
+        result_label.set_text(f'Nth Term: {"Generator Failed"}')
+
+
+def generate_fields(count):
+    input_container.clear()
+    inputs.clear()
+    
+    with input_container:
+        for i in range(int(count)):
+            new_input = ui.number(label=f'value {i+1}', value=0, on_change=update).classes('w-20')
+            inputs.append(new_input)
+    
+    update()
+
+   
+if __name__ in {"__main__", "__mp_main__"}:
+    ui.query('body')
+
+    ui.label('Nth Term Generator').classes('text-h4')
+    with ui.row().classes('items-center'):
+        count_input = ui.number(label='Sequence Length', value=5, min=2, step=1)
+        ui.button('Reset Slots', on_click=lambda: generate_fields(count_input.value))
+
+    input_container = ui.row().classes('flex-wrap')
+    result_label = ui.label('Nth Term: ...').classes('text-h5 q-mt-md text-primary')
+    generate_fields(count_input.value)
+
+    ui.run()
